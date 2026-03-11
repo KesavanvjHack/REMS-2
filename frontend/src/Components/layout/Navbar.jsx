@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 const Navbar = () => {
   const navigate = useNavigate();
   const username = localStorage.getItem("username") || "User";
-  const role = localStorage.getItem("role") || "Employee";
+  const role = localStorage.getItem("userRole") || "Employee";
   const profileImage = localStorage.getItem("profile_image");
 
   const [dropdownOpen, setDropdownOpen] = useState(false);

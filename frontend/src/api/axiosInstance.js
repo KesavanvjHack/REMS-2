@@ -40,10 +40,10 @@ axiosInstance.interceptors.response.use(
             return Promise.reject(error);
         }
 
-        const { status } = error.response;
+        const { status, config } = error.response;
 
-        // Unauthorized → logout user
-        if (status === 401) {
+        // Unauthorized → logout user (but ignore for login endpoint)
+        if (status === 401 && !config.url.includes("auth/login")) {
             localStorage.removeItem("token");
             alert("Session expired. Please login again.");
             window.location.href = "/login";

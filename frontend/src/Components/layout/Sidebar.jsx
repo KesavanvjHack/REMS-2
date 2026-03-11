@@ -30,7 +30,7 @@ const navItems = {
 
 const Sidebar = () => {
   const navigate = useNavigate();
-  const role = localStorage.getItem("role") || "Employee";
+  const role = localStorage.getItem("userRole") || "Employee";
   const [collapsed, setCollapsed] = useState(false);
   const items = navItems[role] || navItems.Employee;
 

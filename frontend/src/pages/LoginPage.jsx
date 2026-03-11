@@ -14,16 +14,15 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      const res = await axiosInstance.post("login/", form);
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("refresh", res.data.refresh);
-      localStorage.setItem("user_id", res.data.user_id);
+      const res = await axiosInstance.post("auth/login/", form);
+      // Backend returns { access, refresh, role, username, ... }
+      localStorage.setItem("token", res.data.access || res.data.token);
+      localStorage.setItem("userRole", res.data.role);
       localStorage.setItem("username", res.data.username);
-      localStorage.setItem("role", res.data.role);
-      localStorage.setItem("profile_image", res.data.profile_image || "");
+      
       navigate("/dashboard", { replace: true });
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed. Please try again.");
+      setError(err.response?.data?.error || err.response?.data?.message || "Login failed. Please try again.");
     } finally {
       setLoading(false);
     }

@@ -1,0 +1,38 @@
+from django.db import models
+from django.conf import settings
+from core.models import BaseModel
+
+class WorkSession(BaseModel):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='work_sessions')
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField(null=True, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.start_time}"
+
+class BreakSession(BaseModel):
+    BREAK_TYPES = (
+        ('LUNCH', 'Lunch'),
+        ('SHORT', 'Short Break'),
+        ('PERSONAL', 'Personal'),
+    )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='break_sessions')
+    work_session = models.ForeignKey(WorkSession, on_delete=models.CASCADE, related_name='breaks', null=True)
+    break_type = models.CharField(max_length=20, choices=BREAK_TYPES, default='SHORT')
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.break_type} ({self.start_time})"
+
+class IdleLog(BaseModel):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='idle_logs')
+    work_session = models.ForeignKey(WorkSession, on_delete=models.CASCADE, related_name='idle_logs', null=True)
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField(null=True, blank=True)
+    reason = models.CharField(max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.user.username} Idle: {self.start_time}"

@@ -1,39 +1,12 @@
+import { useState, useEffect } from "react";
 import StatCard from "../components/ui/StatCard";
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell,
 } from "recharts";
-
-const weeklyData = [
-  { day: "Mon", hours: 8.2, productive: 7.5 },
-  { day: "Tue", hours: 7.8, productive: 7.1 },
-  { day: "Wed", hours: 8.5, productive: 8.0 },
-  { day: "Thu", hours: 7.5, productive: 6.9 },
-  { day: "Fri", hours: 8.0, productive: 7.3 },
-];
-
-const activityData = [
-  { name: "Active", value: 75 },
-  { name: "Idle", value: 15 },
-  { name: "Break", value: 10 },
-];
+import axiosInstance from "../api/axiosInstance";
 
 const COLORS = ["#22c55e", "#f59e0b", "#6366f1"];
-
-const teamMembers = [
-  { name: "Arun Kumar", status: "Active", hours: "7h 23m", avatar: "A" },
-  { name: "Priya Sharma", status: "Idle", hours: "6h 15m", avatar: "P" },
-  { name: "Ravi Patel", status: "Active", hours: "8h 01m", avatar: "R" },
-  { name: "Meena S.", status: "Break", hours: "5h 45m", avatar: "M" },
-  { name: "Vikram J.", status: "Offline", hours: "0h 00m", avatar: "V" },
-];
-
-const statusColor = {
-  Active: "bg-green-500",
-  Idle: "bg-amber-500",
-  Break: "bg-blue-500",
-  Offline: "bg-gray-500",
-};
 
 const chartTooltipStyle = {
   contentStyle: {
@@ -46,8 +19,47 @@ const chartTooltipStyle = {
 };
 
 const DashboardPage = () => {
-  const role = localStorage.getItem("role") || "Employee";
+  const [stats, setStats] = useState(null);
+  const [teamSummary, setTeamSummary] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const role = localStorage.getItem("userRole") || "Employee";
   const username = localStorage.getItem("username") || "User";
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [statsRes, teamRes] = await Promise.all([
+          axiosInstance.get("reports/summary/"),
+          (role === "Admin" || role === "Manager") 
+            ? axiosInstance.get("records/team_summary/") 
+            : Promise.resolve({ data: null })
+        ]);
+        setStats(statsRes.data);
+        setTeamSummary(teamRes.data);
+      } catch (err) {
+        console.error("Dashboard data fetch failed", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [role]);
+
+  const weeklyData = stats?.weekly_trend || [
+    { day: "Mon", hours: 0, productive: 0 },
+    { day: "Tue", hours: 0, productive: 0 },
+    { day: "Wed", hours: 0, productive: 0 },
+    { day: "Thu", hours: 0, productive: 0 },
+    { day: "Fri", hours: 0, productive: 0 },
+  ];
+
+  const activityData = [
+    { name: "Active", value: stats?.activity_breakdown?.active || 100 },
+    { name: "Idle", value: stats?.activity_breakdown?.idle || 0 },
+    { name: "Break", value: stats?.activity_breakdown?.break || 0 },
+  ];
+
+  if (loading) return <div className="py-20 text-center text-gray-400">Loading dashboard...</div>;
 
   return (
     <div className="space-y-6">
@@ -62,36 +74,32 @@ const DashboardPage = () => {
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          title="Today's Hours"
-          value="7h 23m"
-          subtitle="Punched in at 9:02 AM"
-          icon="⏰"
-          trend="up"
-          trendValue="12% vs yesterday"
-          color="accent"
-        />
-        <StatCard
-          title="Productive Time"
-          value="6h 48m"
-          subtitle="92% productivity"
-          icon="🎯"
-          trend="up"
-          trendValue="5% vs avg"
+          title="Present Days"
+          value={stats?.total_present || 0}
+          subtitle="This month"
+          icon="✅"
           color="success"
         />
         <StatCard
-          title="Break Time"
-          value="35m"
-          subtitle="1 of 60m used"
-          icon="☕"
+          title="Absent Days"
+          value={stats?.total_absent || 0}
+          subtitle="This month"
+          icon="❌"
+          color="danger"
+        />
+        <StatCard
+          title="Late Arrivals"
+          value={stats?.total_late || 0}
+          subtitle="This month"
+          icon="⏳"
           color="warning"
         />
         <StatCard
-          title="Idle Time"
-          value="12m"
-          subtitle="Under threshold"
-          icon="💤"
-          color="info"
+          title="Avg. Hours"
+          value={`${Number(stats?.avg_working_hours || 0).toFixed(1)}h`}
+          subtitle="Daily working"
+          icon="📊"
+          color="accent"
         />
       </div>
 
@@ -124,7 +132,7 @@ const DashboardPage = () => {
 
         {/* Activity Breakdown */}
         <div className="bg-dark-800 border border-dark-600 rounded-xl p-5">
-          <h3 className="text-sm font-semibold text-gray-300 mb-4">Today's Activity</h3>
+          <h3 className="text-sm font-semibold text-gray-300 mb-4">Activity Breakdown</h3>
           <ResponsiveContainer width="100%" height={200}>
             <PieChart>
               <Pie
@@ -137,16 +145,16 @@ const DashboardPage = () => {
                 dataKey="value"
               >
                 {activityData.map((_, i) => (
-                  <Cell key={i} fill={COLORS[i]} />
+                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
                 ))}
               </Pie>
               <Tooltip {...chartTooltipStyle} />
             </PieChart>
           </ResponsiveContainer>
-          <div className="flex justify-center gap-4 mt-2">
+          <div className="flex flex-wrap justify-center gap-4 mt-2">
             {activityData.map((item, i) => (
               <div key={item.name} className="flex items-center gap-1.5 text-xs text-gray-400">
-                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[i] }} />
+                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
                 {item.name} ({item.value}%)
               </div>
             ))}
@@ -157,32 +165,35 @@ const DashboardPage = () => {
       {/* Bottom Row: Team Panel + Attendance Bar */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Team Members (for managers/admins) */}
-        {(role === "Manager" || role === "Admin") && (
+        {(role === "Manager" || role === "Admin") && teamSummary && (
           <div className="bg-dark-800 border border-dark-600 rounded-xl p-5">
-            <h3 className="text-sm font-semibold text-gray-300 mb-4">Team Members</h3>
-            <div className="space-y-3">
-              {teamMembers.map((m) => (
-                <div key={m.name} className="flex items-center gap-3 p-3 rounded-lg hover:bg-dark-700 transition-colors">
+            <h3 className="text-sm font-semibold text-gray-300 mb-4">Team Summary (Last 30 Days)</h3>
+            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+              {teamSummary.team_details.slice(0, 5).map((m) => (
+                <div key={m.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-dark-700 transition-colors">
                   <div className="w-9 h-9 rounded-full bg-accent/20 flex items-center justify-center text-sm font-bold text-accent">
-                    {m.avatar}
+                    {m.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium text-white truncate">{m.name}</div>
-                    <div className="text-xs text-gray-400">{m.hours} today</div>
+                    <div className="text-xs text-gray-400">{m.role}</div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${statusColor[m.status]}`} />
-                    <span className="text-xs text-gray-400">{m.status}</span>
+                  <div className="text-right">
+                    <div className="text-xs font-semibold text-white">{m.present} Days Present</div>
+                    <div className="text-[10px] text-gray-500">{Number(m.avgHours).toFixed(1)}h avg</div>
                   </div>
                 </div>
               ))}
+              {teamSummary.team_details.length === 0 && (
+                <p className="text-sm text-gray-500 italic">No team data available.</p>
+              )}
             </div>
           </div>
         )}
 
         {/* Weekly Attendance Bar */}
         <div className="bg-dark-800 border border-dark-600 rounded-xl p-5">
-          <h3 className="text-sm font-semibold text-gray-300 mb-4">This Week's Attendance</h3>
+          <h3 className="text-sm font-semibold text-gray-300 mb-4">Weekly Attendance Trend</h3>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={weeklyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#323a50" />

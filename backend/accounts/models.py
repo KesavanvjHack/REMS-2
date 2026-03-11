@@ -3,10 +3,20 @@ from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
+    ADMIN = 'Admin'
+    MANAGER = 'Manager'
+    EMPLOYEE = 'Employee'
+    
+    ROLE_CHOICES = (
+        (ADMIN, 'Admin'),
+        (MANAGER, 'Manager'),
+        (EMPLOYEE, 'Employee'),
+    )
+
     fullname = models.CharField(max_length=100)
     designation = models.CharField(max_length=100)
     department = models.CharField(max_length=100)
-    role = models.CharField(max_length=50)
+    role = models.CharField(max_length=50, choices=ROLE_CHOICES, default=EMPLOYEE)
     gender = models.CharField(max_length=10)
     address = models.TextField()
     mobile = models.CharField(max_length=10, unique=True)
@@ -24,8 +34,6 @@ class OTP(models.Model):
 
     def __str__(self):
         return f"{self.mobile} - {self.otp}"
-    
-    from django.db import models
 
 
 

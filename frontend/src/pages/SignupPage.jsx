@@ -18,10 +18,10 @@ const SignupPage = () => {
     setError("");
     setLoading(true);
     try {
-      await axiosInstance.post("signup/", form);
+      await axiosInstance.post("auth/signup/", form);
       navigate("/login");
     } catch (err) {
-      setError(err.response?.data?.message || JSON.stringify(err.response?.data) || "Signup failed");
+      setError(err.response?.data?.error || err.response?.data?.message || "Signup failed");
     } finally {
       setLoading(false);
     }

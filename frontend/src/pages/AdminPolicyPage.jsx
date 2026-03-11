@@ -1,39 +1,52 @@
-import { useState } from "react";
-
-const defaultPolicy = {
-  shiftStart: "09:00",
-  shiftEnd: "18:00",
-  gracePeriod: 15,
-  minFullDay: 8,
-  minHalfDay: 4,
-  maxIdle: 30,
-  breakDuration: 60,
-};
+import { useState, useEffect } from "react";
+import axiosInstance from "../api/axiosInstance";
 
 const AdminPolicyPage = () => {
-  const [policy, setPolicy] = useState(defaultPolicy);
+  const [policy, setPolicy] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    const fetchPolicy = async () => {
+      try {
+        const res = await axiosInstance.get("policies/current/");
+        setPolicy(res.data);
+      } catch (err) {
+        console.error("Failed to fetch policy", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPolicy();
+  }, []);
 
   const handleChange = (key, value) => {
     setPolicy({ ...policy, [key]: value });
     setSaved(false);
   };
 
-  const handleSave = () => {
-    // TODO: API call
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  const handleSave = async () => {
+    try {
+      const res = await axiosInstance.put("policies/current/", policy);
+      setPolicy(res.data);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (err) {
+      alert("Failed to save policy");
+    }
   };
 
   const fields = [
-    { key: "shiftStart", label: "Shift Start Time", type: "time", icon: "🕘" },
-    { key: "shiftEnd", label: "Shift End Time", type: "time", icon: "🕕" },
-    { key: "gracePeriod", label: "Grace Period (minutes)", type: "number", icon: "⏱" },
-    { key: "minFullDay", label: "Min Hours — Full Day", type: "number", icon: "📅" },
-    { key: "minHalfDay", label: "Min Hours — Half Day", type: "number", icon: "🌗" },
-    { key: "maxIdle", label: "Max Idle Time (minutes)", type: "number", icon: "💤" },
-    { key: "breakDuration", label: "Allowed Break (minutes)", type: "number", icon: "☕" },
+    { key: "shift_start", label: "Shift Start Time", type: "time", icon: "🕘" },
+    { key: "shift_end", label: "Shift End Time", type: "time", icon: "🕕" },
+    { key: "grace_period", label: "Grace Period (minutes)", type: "number", icon: "⏱" },
+    { key: "min_full_day", label: "Min Hours — Full Day", type: "number", icon: "📅" },
+    { key: "min_half_day", label: "Min Hours — Half Day", type: "number", icon: "🌗" },
+    { key: "max_idle_minutes", label: "Max Idle Time (minutes)", type: "number", icon: "💤" },
+    { key: "allowed_break_minutes", label: "Allowed Break (minutes)", type: "number", icon: "☕" },
   ];
+
+  if (loading) return <div className="py-20 text-center text-gray-400">Loading policy...</div>;
 
   return (
     <div className="space-y-6">
@@ -52,7 +65,7 @@ const AdminPolicyPage = () => {
               <label className="flex-1 text-sm font-medium text-gray-300">{f.label}</label>
               <input
                 type={f.type}
-                value={policy[f.key]}
+                value={policy[f.key] || ""}
                 onChange={(e) =>
                   handleChange(f.key, f.type === "number" ? Number(e.target.value) : e.target.value)
                 }
@@ -75,21 +88,7 @@ const AdminPolicyPage = () => {
           {saved && (
             <span className="text-sm text-green-400 animate-pulse">✓ Policy saved successfully</span>
           )}
-          <button
-            onClick={() => setPolicy(defaultPolicy)}
-            className="px-6 py-2.5 bg-dark-700 border border-dark-600 text-gray-300 font-medium
-              rounded-lg transition-all duration-200 text-sm hover:bg-dark-600 ml-auto"
-          >
-            Reset to Default
-          </button>
         </div>
-      </div>
-
-      {/* Audit hint */}
-      <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 max-w-2xl">
-        <p className="text-sm text-amber-400">
-          ⚠️ All policy changes are logged in the audit trail for compliance.
-        </p>
       </div>
     </div>
   );

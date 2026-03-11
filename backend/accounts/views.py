@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -16,6 +16,7 @@ from .serializers import SignupSerializer
 # SEND OTP
 # ========================
 @api_view(["POST"])
+@permission_classes([AllowAny])
 def send_otp(request):
     mobile = request.data.get("mobile")
 
@@ -41,6 +42,7 @@ def send_otp(request):
 # VERIFY OTP
 # =====================
 @api_view(["POST"])
+@permission_classes([AllowAny])
 def verify_otp(request):
     mobile = request.data.get("mobile")
     otp = request.data.get("otp")
@@ -61,6 +63,7 @@ def verify_otp(request):
 # SIGNUP
 # ========================
 @api_view(["POST"])
+@permission_classes([AllowAny])
 def signup(request):
     serializer = SignupSerializer(data=request.data)
 
@@ -78,6 +81,7 @@ def signup(request):
 # LOGIN (JWT + ROLE BASED)
 # ========================
 @api_view(["POST"])
+@permission_classes([AllowAny])
 def login_view(request):
     username = request.data.get("username")
     password = request.data.get("password")
@@ -94,17 +98,15 @@ def login_view(request):
         refresh = RefreshToken.for_user(user)
 
         return Response({
-            "token": str(refresh.access_token),
+            "access": str(refresh.access_token),
             "refresh": str(refresh),
-            "user_id": user.id,          # ✅ auto-generated
+            "user_id": user.id,
             "username": user.username,
             "role": user.role,
-            "profile_image": request.build_absolute_uri(user.profile_picture.url) if user.profile_picture else ""
-
         }, status=status.HTTP_200_OK)
 
     return Response(
-        {"message": "Invalid credentials"},
+        {"error": "Invalid credentials"},
         status=status.HTTP_401_UNAUTHORIZED
     )
 
