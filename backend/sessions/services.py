@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.utils import timezone
 from .models import WorkSession, BreakSession, IdleLog
 
@@ -6,7 +6,16 @@ class SessionService:
     @staticmethod
     def punch_in(user, ip=None, user_agent=None):
         # Close any open sessions for this user before starting new one
-        WorkSession.objects.filter(user=user, end_time__isnull=True).update(end_time=timezone.now())
+        # If open session is very old (> 16 hours), close it with a reasonable end time
+        now = timezone.now()
+        active_sessions = WorkSession.objects.filter(user=user, end_time__isnull=True)
+        for s in active_sessions:
+            if (now - s.start_time).total_seconds() > 57600: # 16 hours
+                s.end_time = s.start_time + timedelta(hours=8) # Guess 8 hours
+                s.save()
+            else:
+                s.end_time = now
+                s.save()
         
         return WorkSession.objects.create(
             user=user,
@@ -17,7 +26,7 @@ class SessionService:
 
     @staticmethod
     def punch_out(user):
-        session = WorkSession.objects.filter(user=user, end_time__isnull=True).first()
+        session = WorkSession.objects.filter(user=user, end_time__isnull=True).last()
         if session:
             now = timezone.now()
             session.end_time = now

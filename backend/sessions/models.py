@@ -9,8 +9,15 @@ class WorkSession(BaseModel):
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.TextField(null=True, blank=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['user', 'start_time']),
+            models.Index(fields=['start_time']),
+        ]
+
     def __str__(self):
         return f"{self.user.username} - {self.start_time}"
+
 
 class BreakSession(BaseModel):
     BREAK_TYPES = (
@@ -23,6 +30,12 @@ class BreakSession(BaseModel):
     break_type = models.CharField(max_length=20, choices=BREAK_TYPES, default='SHORT')
     start_time = models.DateTimeField()
     end_time = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['user', 'start_time']),
+            models.Index(fields=['work_session', 'break_type']),
+        ]
 
     def __str__(self):
         return f"{self.user.username} - {self.break_type} ({self.start_time})"

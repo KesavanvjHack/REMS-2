@@ -38,7 +38,7 @@ const ReportsPage = () => {
   useEffect(() => {
     const fetchReport = async () => {
       try {
-        const res = await axiosInstance.get("records/team_summary/");
+        const res = await axiosInstance.get("attendance/records/team_summary/");
         setData(res.data);
       } catch (err) {
         console.error("Failed to fetch reports", err);

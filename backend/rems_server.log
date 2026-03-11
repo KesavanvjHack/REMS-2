@@ -1,0 +1,72 @@
+INFO 2026-03-11 20:05:37,297 autoreload 8656 7236 Watching for file changes with StatReloader
+INFO 2026-03-11 20:06:03,146 autoreload 8656 7236 D:\REMS-main\backend\backend\settings.py changed, reloading.
+INFO 2026-03-11 20:06:09,510 autoreload 8012 4464 Watching for file changes with StatReloader
+INFO 2026-03-11 20:06:37,023 autoreload 8012 4464 D:\REMS-main\backend\attendance\models.py changed, reloading.
+INFO 2026-03-11 20:06:43,937 autoreload 8884 8912 Watching for file changes with StatReloader
+INFO 2026-03-11 20:07:07,515 autoreload 8884 8912 D:\REMS-main\backend\sessions\models.py changed, reloading.
+INFO 2026-03-11 20:07:15,259 autoreload 11164 8964 Watching for file changes with StatReloader
+INFO 2026-03-11 20:07:32,277 autoreload 11164 8964 D:\REMS-main\backend\sessions\models.py changed, reloading.
+INFO 2026-03-11 20:07:37,665 autoreload 12752 8308 Watching for file changes with StatReloader
+INFO 2026-03-11 20:10:14,815 autoreload 12752 8308 D:\REMS-main\backend\attendance\views.py changed, reloading.
+INFO 2026-03-11 20:10:19,736 autoreload 12980 9556 Watching for file changes with StatReloader
+INFO 2026-03-11 20:10:38,260 autoreload 12980 9556 D:\REMS-main\backend\reports\views.py changed, reloading.
+INFO 2026-03-11 20:10:42,623 autoreload 2292 14324 Watching for file changes with StatReloader
+INFO 2026-03-11 20:11:15,770 autoreload 2292 14324 D:\REMS-main\backend\sessions\services.py changed, reloading.
+INFO 2026-03-11 20:11:20,816 autoreload 9144 11184 Watching for file changes with StatReloader
+INFO 2026-03-11 20:12:24,664 autoreload 9144 11184 D:\REMS-main\backend\sessions\services.py changed, reloading.
+INFO 2026-03-11 20:12:29,322 autoreload 10844 12604 Watching for file changes with StatReloader
+INFO 2026-03-11 20:22:26,758 autoreload 10844 12604 D:\REMS-main\backend\attendance\views.py changed, reloading.
+INFO 2026-03-11 20:22:33,709 autoreload 10668 9472 Watching for file changes with StatReloader
+INFO 2026-03-11 20:27:14,610 autoreload 10668 9472 D:\REMS-main\backend\sessions\views.py changed, reloading.
+INFO 2026-03-11 20:27:21,475 autoreload 5248 12040 Watching for file changes with StatReloader
+INFO 2026-03-11 20:31:41,048 autoreload 5248 12040 D:\REMS-main\backend\accounts\views.py changed, reloading.
+INFO 2026-03-11 20:31:54,834 autoreload 10896 13840 Watching for file changes with StatReloader
+INFO 2026-03-11 20:32:04,074 autoreload 10896 13840 D:\REMS-main\backend\accounts\views.py changed, reloading.
+INFO 2026-03-11 20:32:14,400 autoreload 10200 13200 Watching for file changes with StatReloader
+INFO 2026-03-11 20:35:00,922 autoreload 10896 2304 Watching for file changes with StatReloader
+INFO 2026-03-11 20:39:14,224 error_handler 10896 1396 Request: GET /admin/accounts/user/ - User: kesavan
+INFO 2026-03-11 20:39:15,140 error_handler 10896 1396 Response: GET /admin/accounts/user/ - Status: 200
+INFO 2026-03-11 20:42:13,730 error_handler 10896 1396 Request: POST /admin/accounts/user/ - User: kesavan
+INFO 2026-03-11 20:42:13,967 error_handler 10896 1396 Response: POST /admin/accounts/user/ - Status: 200
+INFO 2026-03-11 20:42:16,918 error_handler 10896 1396 Request: POST /admin/accounts/user/ - User: kesavan
+INFO 2026-03-11 20:42:17,128 error_handler 10896 1396 Response: POST /admin/accounts/user/ - Status: 302
+INFO 2026-03-11 20:42:17,172 error_handler 10896 1396 Request: GET /admin/accounts/user/ - User: kesavan
+INFO 2026-03-11 20:42:17,200 error_handler 10896 1396 Response: GET /admin/accounts/user/ - Status: 200
+INFO 2026-03-11 20:42:17,318 error_handler 10896 1396 Request: GET /admin/jsi18n/ - User: kesavan
+INFO 2026-03-11 20:42:17,333 error_handler 10896 1396 Response: GET /admin/jsi18n/ - Status: 200
+INFO 2026-03-11 20:43:57,315 error_handler 10896 4620 Request: POST /api/auth/send-otp/ - User: AnonymousUser
+INFO 2026-03-11 20:43:57,438 error_handler 10896 4620 Response: POST /api/auth/send-otp/ - Status: 401
+WARNING 2026-03-11 20:43:57,441 log 10896 4620 Unauthorized: /api/auth/send-otp/
+INFO 2026-03-11 20:44:19,876 error_handler 10896 1396 Request: GET /admin/accounts/user/ - User: kesavan
+INFO 2026-03-11 20:44:19,928 error_handler 10896 1396 Response: GET /admin/accounts/user/ - Status: 200
+INFO 2026-03-11 20:44:20,034 error_handler 10896 1396 Request: GET /admin/jsi18n/ - User: kesavan
+INFO 2026-03-11 20:44:20,039 error_handler 10896 1396 Response: GET /admin/jsi18n/ - Status: 200
+INFO 2026-03-11 20:44:21,364 error_handler 10896 1396 Request: GET /admin/accounts/user/ - User: kesavan
+INFO 2026-03-11 20:44:21,393 error_handler 10896 1396 Response: GET /admin/accounts/user/ - Status: 200
+INFO 2026-03-11 20:44:21,491 error_handler 10896 1396 Request: GET /admin/jsi18n/ - User: kesavan
+INFO 2026-03-11 20:44:21,496 error_handler 10896 1396 Response: GET /admin/jsi18n/ - Status: 200
+INFO 2026-03-11 20:44:22,438 error_handler 10896 1396 Request: GET /admin/accounts/user/ - User: kesavan
+INFO 2026-03-11 20:44:22,467 error_handler 10896 1396 Response: GET /admin/accounts/user/ - Status: 200
+INFO 2026-03-11 20:44:22,572 error_handler 10896 1396 Request: GET /admin/jsi18n/ - User: kesavan
+INFO 2026-03-11 20:44:22,576 error_handler 10896 1396 Response: GET /admin/jsi18n/ - Status: 200
+INFO 2026-03-11 20:44:23,555 error_handler 10896 1396 Request: GET /admin/accounts/user/ - User: kesavan
+INFO 2026-03-11 20:44:23,588 error_handler 10896 1396 Response: GET /admin/accounts/user/ - Status: 200
+INFO 2026-03-11 20:44:23,726 error_handler 10896 1396 Request: GET /admin/jsi18n/ - User: kesavan
+INFO 2026-03-11 20:44:23,748 error_handler 10896 1396 Response: GET /admin/jsi18n/ - Status: 200
+INFO 2026-03-11 20:44:25,685 error_handler 10896 1396 Request: GET /admin/accounts/user/ - User: kesavan
+INFO 2026-03-11 20:44:25,721 error_handler 10896 1396 Response: GET /admin/accounts/user/ - Status: 200
+INFO 2026-03-11 20:44:25,833 error_handler 10896 1396 Request: GET /admin/jsi18n/ - User: kesavan
+INFO 2026-03-11 20:44:25,838 error_handler 10896 1396 Response: GET /admin/jsi18n/ - Status: 200
+INFO 2026-03-11 20:44:26,080 error_handler 10896 1396 Request: GET /admin/accounts/user/ - User: kesavan
+INFO 2026-03-11 20:44:26,117 error_handler 10896 1396 Response: GET /admin/accounts/user/ - Status: 200
+INFO 2026-03-11 20:44:26,219 error_handler 10896 1396 Request: GET /admin/jsi18n/ - User: kesavan
+INFO 2026-03-11 20:44:26,226 error_handler 10896 1396 Response: GET /admin/jsi18n/ - Status: 200
+INFO 2026-03-11 20:44:26,797 error_handler 10896 1396 Request: GET /admin/accounts/user/ - User: kesavan
+INFO 2026-03-11 20:44:26,832 error_handler 10896 1396 Response: GET /admin/accounts/user/ - Status: 200
+INFO 2026-03-11 20:44:26,925 error_handler 10896 1396 Request: GET /admin/jsi18n/ - User: kesavan
+INFO 2026-03-11 20:44:26,928 error_handler 10896 1396 Response: GET /admin/jsi18n/ - Status: 200
+INFO 2026-03-11 20:44:27,108 error_handler 10896 1396 Request: GET /admin/accounts/user/ - User: kesavan
+INFO 2026-03-11 20:44:27,132 error_handler 10896 1396 Response: GET /admin/accounts/user/ - Status: 200
+INFO 2026-03-11 20:44:27,221 error_handler 10896 1396 Request: GET /admin/jsi18n/ - User: kesavan
+INFO 2026-03-11 20:44:27,226 error_handler 10896 1396 Response: GET /admin/jsi18n/ - Status: 200
+INFO 2026-03-11 20:45:07,912 autoreload 8108 13248 Watching for file changes with StatReloader

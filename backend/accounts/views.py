@@ -9,6 +9,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import OTP, User
+from audit.models import AuditLog
 from .serializers import SignupSerializer
 
 
@@ -83,7 +84,14 @@ def signup(request):
     serializer = SignupSerializer(data=request.data)
 
     if serializer.is_valid():
-        serializer.save()
+        user = serializer.save()
+        AuditLog.objects.create(
+            user=user,
+            action="SIGNUP",
+            description=f"New user {user.username} registered",
+            ip_address=request.META.get('REMOTE_ADDR'),
+            module="AUTH"
+        )
         return Response(
             {"message": "User registered successfully"},
             status=status.HTTP_201_CREATED
@@ -111,6 +119,14 @@ def login_view(request):
 
     if user is not None:
         refresh = RefreshToken.for_user(user)
+
+        AuditLog.objects.create(
+            user=user,
+            action="LOGIN",
+            description=f"User {user.username} logged in",
+            ip_address=request.META.get('REMOTE_ADDR'),
+            module="AUTH"
+        )
 
         return Response({
             "access": str(refresh.access_token),

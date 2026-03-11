@@ -31,7 +31,7 @@ const DashboardPage = () => {
         const [statsRes, teamRes] = await Promise.all([
           axiosInstance.get("reports/summary/"),
           (role === "Admin" || role === "Manager") 
-            ? axiosInstance.get("records/team_summary/") 
+            ? axiosInstance.get("attendance/records/team_summary/") 
             : Promise.resolve({ data: null })
         ]);
         setStats(statsRes.data);

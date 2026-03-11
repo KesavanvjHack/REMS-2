@@ -12,9 +12,32 @@ const BreakTrackerPage = () => {
   const [pastBreaks, setPastBreaks] = useState([]);
   const timerRef = useRef(null);
 
+  const fetchStatus = async () => {
+    try {
+      const res = await axiosInstance.get("sessions/break/");
+      if (res.data.on_break) {
+        setOnBreak(true);
+        setActiveBreak(res.data.break);
+        setBreakType(res.data.break.break_type);
+        
+        const start = new Date(res.data.break.start_time);
+        const now = new Date();
+        setElapsed(Math.floor((now - start) / 1000));
+      }
+    } catch (err) {
+      console.error("Break status fetch failed", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchStatus();
+  }, []);
+
   useEffect(() => {
     if (onBreak) {
       timerRef.current = setInterval(() => setElapsed((p) => p + 1), 1000);
+    } else {
+      clearInterval(timerRef.current);
     }
     return () => clearInterval(timerRef.current);
   }, [onBreak]);

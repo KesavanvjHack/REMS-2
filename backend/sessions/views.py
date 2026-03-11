@@ -2,6 +2,7 @@ from rest_framework import status, views, response, permissions
 from .services import SessionService
 from .serializers import WorkSessionSerializer, BreakSessionSerializer
 from .models import WorkSession, BreakSession
+from audit.models import AuditLog
 
 class PunchView(views.APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -22,15 +23,41 @@ class PunchView(views.APIView):
             ip = request.META.get('REMOTE_ADDR')
             ua = request.META.get('HTTP_USER_AGENT')
             session = SessionService.punch_in(request.user, ip, ua)
+            AuditLog.objects.create(
+                user=request.user,
+                action="PUNCH_IN",
+                description="User clocked in for work",
+                ip_address=ip,
+                module="SESSIONS"
+            )
             return response.Response(WorkSessionSerializer(session).data, status=status.HTTP_201_CREATED)
         elif action == 'out':
             session = SessionService.punch_out(request.user)
             if session:
+                AuditLog.objects.create(
+                    user=request.user,
+                    action="PUNCH_OUT",
+                    description="User clocked out from work",
+                    ip_address=request.META.get('REMOTE_ADDR'),
+                    module="SESSIONS"
+                )
                 return response.Response(WorkSessionSerializer(session).data)
             return response.Response({"error": "No active session found"}, status=status.HTTP_400_BAD_REQUEST)
         return response.Response({"error": "Invalid action"}, status=status.HTTP_400_BAD_REQUEST)
 
 class BreakView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        """Get current active break status"""
+        brk = BreakSession.objects.filter(user=request.user, end_time__isnull=True).first()
+        if brk:
+            return response.Response({
+                "on_break": True,
+                "break": BreakSessionSerializer(brk).data
+            })
+        return response.Response({"on_break": False})
+
     def post(self, request):
         action = request.data.get('action') # 'start' or 'stop'
         if action == 'start':

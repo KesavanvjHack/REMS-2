@@ -26,6 +26,10 @@ class AttendanceRecord(BaseModel):
 
     class Meta:
         unique_together = ('user', 'date')
+        indexes = [
+            models.Index(fields=['date', 'status']),
+            models.Index(fields=['user', 'status']),
+        ]
 
     def __str__(self):
         return f"{self.user.username} - {self.date} - {self.status}"

@@ -24,6 +24,7 @@ const navItems = {
     { to: "/breaks", icon: "☕", label: "Break Tracker" },
     { to: "/manager-review", icon: "👥", label: "Team Review" },
     { to: "/admin-policy", icon: "⚙️", label: "Policies" },
+    { to: "/audit", icon: "📜", label: "Audit Logs" },
     { to: "/reports", icon: "📈", label: "Reports" },
   ],
 };

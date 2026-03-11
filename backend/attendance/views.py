@@ -13,13 +13,22 @@ class AttendanceRecordViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = AttendanceRecordSerializer
 
     def get_queryset(self):
+        """
+        Optimized queryset using select_related to join User table in a single query.
+        Implements RBAC: Employees see only their records; Admin/Managers see all.
+        """
         user = self.request.user
+        queryset = AttendanceRecord.objects.all().select_related('user').order_by('-date')
         if user.role in ['Admin', 'Manager']:
-            return AttendanceRecord.objects.all().order_by('-date')
-        return AttendanceRecord.objects.filter(user=user).order_by('-date')
+            return queryset
+        return queryset.filter(user=user)
 
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def team_summary(self, request):
+        """
+        High-performance team summary dashboard endpoint.
+        Uses optimized aggregations to minimize DB load.
+        """
         if request.user.role not in ['Admin', 'Manager']:
             return Response({"error": "Unauthorized"}, status=403)
         

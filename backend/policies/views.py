@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from core.permissions import IsAdmin
 from .models import AttendancePolicy
 from .serializers import AttendancePolicySerializer
+from audit.models import AuditLog
 
 class AttendancePolicyViewSet(viewsets.ModelViewSet):
     queryset = AttendancePolicy.objects.all()
@@ -20,6 +21,15 @@ class AttendancePolicyViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(policy, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
+            
+            AuditLog.objects.create(
+                user=request.user,
+                action="POLICY_UPDATE",
+                description=f"Attendance policy updated by {request.user.username}",
+                ip_address=request.META.get('REMOTE_ADDR'),
+                module="POLICIES"
+            )
+            
             return Response(serializer.data)
         
         serializer = self.get_serializer(policy)
