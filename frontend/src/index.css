@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+/* ========================================
+   REMS — Dark Corporate Theme
+   ======================================== */
+
+@theme {
+  --color-dark-900: #0f1117;
+  --color-dark-800: #161922;
+  --color-dark-700: #1e2231;
+  --color-dark-600: #272d3f;
+  --color-dark-500: #323a50;
+  --color-accent: #6366f1;
+  --color-accent-hover: #818cf8;
+  --color-accent-muted: #4f46e5;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #3b82f6;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-dark-900 text-gray-200 font-sans antialiased;
+    margin: 0;
+    padding: 0;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-dark-800);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-dark-500);
+    border-radius: 3px;
+  }
+}

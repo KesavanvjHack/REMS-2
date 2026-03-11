@@ -1,0 +1,120 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axiosInstance from "../api/axiosInstance";
+
+const LoginPage = () => {
+  const navigate = useNavigate();
+  const [form, setForm] = useState({ username: "", password: "" });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const res = await axiosInstance.post("login/", form);
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("refresh", res.data.refresh);
+      localStorage.setItem("user_id", res.data.user_id);
+      localStorage.setItem("username", res.data.username);
+      localStorage.setItem("role", res.data.role);
+      localStorage.setItem("profile_image", res.data.profile_image || "");
+      navigate("/dashboard", { replace: true });
+    } catch (err) {
+      setError(err.response?.data?.message || "Login failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-dark-900 px-4">
+      {/* Background glow */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+      </div>
+
+      <div className="relative w-full max-w-md">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-accent/20 border border-accent/30 mb-4">
+            <span className="text-3xl font-bold text-accent">R</span>
+          </div>
+          <h1 className="text-2xl font-bold text-white">Welcome back</h1>
+          <p className="text-gray-400 text-sm mt-1">Sign in to REMS Attendance System</p>
+        </div>
+
+        {/* Form card */}
+        <div className="bg-dark-800 border border-dark-600 rounded-2xl p-8 shadow-2xl">
+          {error && (
+            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-sm text-red-400">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1.5">Username</label>
+              <input
+                type="text"
+                value={form.username}
+                onChange={(e) => setForm({ ...form, username: e.target.value })}
+                required
+                className="w-full bg-dark-700 border border-dark-600 rounded-lg px-4 py-3
+                  text-sm text-white placeholder-gray-500
+                  focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent
+                  transition-all duration-200"
+                placeholder="Enter your username"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1.5">Password</label>
+              <input
+                type="password"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                required
+                className="w-full bg-dark-700 border border-dark-600 rounded-lg px-4 py-3
+                  text-sm text-white placeholder-gray-500
+                  focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent
+                  transition-all duration-200"
+                placeholder="Enter your password"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 bg-accent hover:bg-accent-hover text-white font-semibold
+                rounded-lg transition-all duration-200 text-sm
+                disabled:opacity-60 disabled:cursor-not-allowed
+                hover:shadow-lg hover:shadow-accent/25"
+            >
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Signing in…
+                </span>
+              ) : (
+                "Sign In"
+              )}
+            </button>
+          </form>
+
+          <p className="text-center text-xs text-gray-500 mt-6">
+            Don't have an account?{" "}
+            <a href="/" className="text-accent hover:text-accent-hover transition-colors">
+              Sign up
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default LoginPage;
