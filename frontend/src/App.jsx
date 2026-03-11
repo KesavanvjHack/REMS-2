@@ -14,6 +14,7 @@ const ManagerReviewPage = lazy(() => import("./pages/ManagerReviewPage"));
 const AdminPolicyPage = lazy(() => import("./pages/AdminPolicyPage"));
 const AuditPage = lazy(() => import("./pages/AuditPage"));
 const ReportsPage = lazy(() => import("./pages/ReportsPage"));
+const LeaveRequestsPage = lazy(() => import("./pages/LeaveRequestsPage"));
 
 const LoadingFallback = () => (
   <div className="min-h-screen bg-dark-900 flex items-center justify-center">
@@ -37,6 +38,7 @@ function App() {
             <Route path="/attendance" element={<AttendancePage />} />
             <Route path="/sessions" element={<WorkSessionsPage />} />
             <Route path="/breaks" element={<BreakTrackerPage />} />
+            <Route path="/leaves" element={<LeaveRequestsPage />} />
             <Route path="/reports" element={<ReportsPage />} />
           </Route>
 

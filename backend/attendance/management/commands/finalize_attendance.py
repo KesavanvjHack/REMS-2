@@ -3,7 +3,7 @@ from django.utils import timezone
 from datetime import timedelta
 from accounts.models import User
 from sessions.models import WorkSession, BreakSession
-from attendance.models import AttendanceRecord
+from attendance.models import AttendanceRecord, Holiday, LeaveRequest
 from decimal import Decimal
 
 class Command(BaseCommand):
@@ -31,7 +31,32 @@ class Command(BaseCommand):
             sessions = WorkSession.objects.filter(user=user, start_time__date=target_date)
             
             if not sessions.exists():
-                # Mark as absent if no sessions and not already recorded
+                # 2.1 Check for Holiday
+                holiday = Holiday.objects.filter(date=target_date).first()
+                if holiday:
+                    AttendanceRecord.objects.update_or_create(
+                        user=user,
+                        date=target_date,
+                        defaults={'status': 'HOLIDAY', 'remarks': holiday.name}
+                    )
+                    continue
+
+                # 2.2 Check for Approved Leave
+                leave = LeaveRequest.objects.filter(
+                    user=user, 
+                    status='APPROVED',
+                    start_date__lte=target_date,
+                    end_date__gte=target_date
+                ).first()
+                if leave:
+                    AttendanceRecord.objects.update_or_create(
+                        user=user,
+                        date=target_date,
+                        defaults={'status': 'ON_LEAVE', 'remarks': f"Leave: {leave.leave_type}"}
+                    )
+                    continue
+
+                # 2.3 Mark as absent if no sessions and no holiday/leave
                 AttendanceRecord.objects.get_or_create(
                     user=user,
                     date=target_date,

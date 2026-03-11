@@ -7,6 +7,7 @@ const navItems = {
     { to: "/attendance", icon: "⏰", label: "Attendance" },
     { to: "/sessions", icon: "💻", label: "Work Sessions" },
     { to: "/breaks", icon: "☕", label: "Break Tracker" },
+    { to: "/leaves", icon: "📄", label: "Leave Requests" },
     { to: "/reports", icon: "📈", label: "Reports" },
   ],
   Manager: [
@@ -15,6 +16,7 @@ const navItems = {
     { to: "/sessions", icon: "💻", label: "Work Sessions" },
     { to: "/breaks", icon: "☕", label: "Break Tracker" },
     { to: "/manager-review", icon: "👥", label: "Team Review" },
+    { to: "/leaves", icon: "📄", label: "Leave Requests" },
     { to: "/reports", icon: "📈", label: "Reports" },
   ],
   Admin: [
@@ -25,6 +27,7 @@ const navItems = {
     { to: "/manager-review", icon: "👥", label: "Team Review" },
     { to: "/admin-policy", icon: "⚙️", label: "Policies" },
     { to: "/audit", icon: "📜", label: "Audit Logs" },
+    { to: "/leaves", icon: "📄", label: "Leave Requests" },
     { to: "/reports", icon: "📈", label: "Reports" },
   ],
 };

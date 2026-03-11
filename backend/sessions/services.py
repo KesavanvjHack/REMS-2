@@ -66,10 +66,42 @@ class SessionService:
     @staticmethod
     def log_heartbeat(user):
         """
-        Logic for heartbeat to detect/close idle logs.
-        If last activity was more than threshold, start idle log.
-        If heartbeat arrives while idle log open, close it.
+        Receives heartbeat from frontend. 
+        If user is idle for > threshold (e.g. 5 mins), mark as idle.
         """
-        # (This will be called by the middleware/view)
-        # For simplicity in this step, we'll implement full logic in the activity view
-        pass
+        now = timezone.now()
+        threshold_minutes = 5
+        
+        # Check if user has an active work session
+        work_session = WorkSession.objects.filter(user=user, end_time__isnull=True).last()
+        if not work_session:
+            return "offline"
+
+        # Check if user is on break
+        on_break = BreakSession.objects.filter(user=user, end_time__isnull=True).exists()
+        if on_break:
+            return "on_break"
+
+        # Logic for Idle Detection:
+        # We look at the last recorded Activity/Heartbeat (stored in User model or a cache)
+        # For simplicity, we'll use a cache to store last heartbeat time
+        from django.core.cache import cache
+        cache_key = f"last_heartbeat_{user.id}"
+        last_heartbeat = cache.get(cache_key)
+        
+        cache.set(cache_key, now, 600) # Store for 10 mins
+
+        if last_heartbeat:
+            diff = (now - last_heartbeat).total_seconds()
+            if diff > (threshold_minutes * 60):
+                # User was away, log idle period
+                IdleLog.objects.create(
+                    user=user,
+                    work_session=work_session,
+                    start_time=last_heartbeat,
+                    end_time=now,
+                    reason="Inactivity detected"
+                )
+                return "idle"
+        
+        return "working"

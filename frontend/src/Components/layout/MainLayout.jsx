@@ -1,9 +1,25 @@
 import { Outlet, Navigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
+import { useEffect } from "react";
+import axiosInstance from "../../api/axiosInstance";
 
 const MainLayout = () => {
   const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    if (!token) return;
+
+    const heartbeat = setInterval(async () => {
+      try {
+        await axiosInstance.post("sessions/heartbeat/");
+      } catch (err) {
+        console.error("Heartbeat failed", err);
+      }
+    }, 60000); // Every minute
+
+    return () => clearInterval(heartbeat);
+  }, [token]);
 
   if (!token) {
     return <Navigate to="/login" replace />;

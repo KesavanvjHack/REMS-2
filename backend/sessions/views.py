@@ -74,7 +74,8 @@ class BreakView(views.APIView):
         return response.Response({"error": "Invalid action"}, status=status.HTTP_400_BAD_REQUEST)
 
 class HeartbeatView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
     def post(self, request):
-        # Activity tracking logic
-        # For now, just return success
-        return response.Response({"status": "active"})
+        status = SessionService.log_heartbeat(request.user)
+        return response.Response({"status": status})

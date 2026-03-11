@@ -5,8 +5,8 @@ from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from accounts.models import User
-from .models import AttendanceRecord
-from .serializers import AttendanceRecordSerializer
+from .models import AttendanceRecord, LeaveRequest, Holiday
+from .serializers import AttendanceRecordSerializer, LeaveRequestSerializer, HolidaySerializer
 from core.permissions import IsManager
 
 class AttendanceRecordViewSet(viewsets.ReadOnlyModelViewSet):
@@ -63,3 +63,34 @@ class AttendanceRecordViewSet(viewsets.ReadOnlyModelViewSet):
             "late_today": late_today,
             "team_details": team_data
         })
+
+class LeaveRequestViewSet(viewsets.ModelViewSet):
+    serializer_class = LeaveRequestSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role in ['Admin', 'Manager']:
+            return LeaveRequest.objects.all().select_related('user').order_by('-created_at')
+        return LeaveRequest.objects.filter(user=user).order_by('-created_at')
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsManager])
+    def review(self, request, pk=None):
+        leave = self.get_object()
+        leave.status = request.data.get('status', 'PENDING')
+        leave.review_remarks = request.data.get('remarks', '')
+        leave.reviewed_by = request.user
+        leave.save()
+        return Response(LeaveRequestSerializer(leave).data)
+
+class HolidayViewSet(viewsets.ModelViewSet):
+    queryset = Holiday.objects.all().order_by('date')
+    serializer_class = HolidaySerializer
+    
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [permissions.IsAdminUser()]
+        return [permissions.IsAuthenticated()]
