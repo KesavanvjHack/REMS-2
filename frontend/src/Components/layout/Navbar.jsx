@@ -25,6 +25,12 @@ const Navbar = () => {
     navigate("/login", { replace: true });
   };
 
+  const getProfileImageUrl = () => {
+    if (!profileImage) return "https://cdn-icons-png.flaticon.com/512/847/847969.png";
+    if (profileImage.startsWith("http")) return profileImage;
+    return `http://127.0.0.1:8000${profileImage}`;
+  };
+
   return (
     <header className="sticky top-0 z-40 h-16 bg-dark-800 border-b border-dark-600 flex items-center px-6 gap-4">
       {/* Search */}
@@ -57,7 +63,7 @@ const Navbar = () => {
             className="flex items-center gap-3 p-1.5 rounded-lg hover:bg-dark-600 transition-all duration-200"
           >
             <img
-              src={profileImage || "https://cdn-icons-png.flaticon.com/512/847/847969.png"}
+              src={getProfileImageUrl()}
               alt="profile"
               className="w-9 h-9 rounded-full object-cover ring-2 ring-dark-500"
             />

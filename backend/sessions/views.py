@@ -4,6 +4,18 @@ from .serializers import WorkSessionSerializer, BreakSessionSerializer
 from .models import WorkSession, BreakSession
 
 class PunchView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        """Get current active session status"""
+        session = WorkSession.objects.filter(user=request.user, end_time__isnull=True).first()
+        if session:
+            return response.Response({
+                "is_punched_in": True,
+                "session": WorkSessionSerializer(session).data
+            })
+        return response.Response({"is_punched_in": False})
+
     def post(self, request):
         action = request.data.get('action') # 'in' or 'out'
         if action == 'in':

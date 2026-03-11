@@ -45,7 +45,7 @@ class AttendanceRecordViewSet(viewsets.ReadOnlyModelViewSet):
                 "present": u_records.filter(status='PRESENT').count(),
                 "absent": u_records.filter(status='ABSENT').count(),
                 "late": u_records.filter(is_late=True).count(),
-                "avgHours": u_records.aggregate(Avg('total_working_hours'))['total_working_hours__avg'] or 0,
+                "avgHours": u_records.aggregate(Avg('total_work_hours'))['total_work_hours__avg'] or 0,
             })
 
         return Response({

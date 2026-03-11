@@ -19,36 +19,51 @@ from .serializers import SignupSerializer
 @permission_classes([AllowAny])
 def send_otp(request):
     mobile = request.data.get("mobile")
+    username = request.data.get("username")
+
+    if not mobile and not username:
+        return Response({"message": "Mobile or Username required"}, status=400)
+
+    if username:
+        user = User.objects.filter(username=username).first()
+        if user:
+            mobile = user.mobile
+        else:
+            return Response({"message": "User not found"}, status=404)
 
     if not mobile:
-        return Response({"message": "Mobile number required"}, status=400)
+        return Response({"message": "User mobile not found"}, status=400)
 
     otp = str(random.randint(100000, 999999))
-
-    # delete old OTP
     OTP.objects.filter(mobile=mobile).delete()
-
     OTP.objects.create(mobile=mobile, otp=otp)
 
-    print("OTP:", otp)  # for testing
+    print(f"OTP for {mobile}: {otp}")
 
     return Response({
         "message": "OTP sent successfully",
-        "otp": otp   # ✅ return otp to frontend (for testing)
+        "otp": otp,
+        "mobile": f"******{mobile[-4:]}" if len(mobile) >= 4 else mobile
     }, status=200)
 
 
-# =====================
-# VERIFY OTP
-# =====================
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def verify_otp(request):
     mobile = request.data.get("mobile")
+    username = request.data.get("username")
     otp = request.data.get("otp")
 
-    if not mobile or not otp:
-        return Response({"message": "Mobile and OTP required"}, status=400)
+    if not otp:
+        return Response({"message": "OTP required"}, status=400)
+
+    if username:
+        user = User.objects.filter(username=username).first()
+        if user:
+            mobile = user.mobile
+
+    if not mobile:
+        return Response({"message": "Mobile required"}, status=400)
 
     otp_obj = OTP.objects.filter(mobile=mobile, otp=otp).first()
 
@@ -103,6 +118,7 @@ def login_view(request):
             "user_id": user.id,
             "username": user.username,
             "role": user.role,
+            "profile_picture": user.profile_picture.url if user.profile_picture else None,
         }, status=status.HTTP_200_OK)
 
     return Response(
