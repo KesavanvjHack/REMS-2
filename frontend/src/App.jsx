@@ -15,6 +15,16 @@ const AdminPolicyPage = lazy(() => import("./pages/AdminPolicyPage"));
 const AuditPage = lazy(() => import("./pages/AuditPage"));
 const ReportsPage = lazy(() => import("./pages/ReportsPage"));
 const LeaveRequestsPage = lazy(() => import("./pages/LeaveRequestsPage"));
+const UsersManagementPage = lazy(() => import("./pages/UsersManagementPage"));
+const HolidayManagementPage = lazy(() => import("./pages/HolidayManagementPage"));
+const ProjectsPage = lazy(() => import("./pages/ProjectsPage"));
+const TasksPage = lazy(() => import("./pages/TasksPage"));
+const KanbanPage = lazy(() => import("./pages/KanbanPage"));
+const AnalyticsPage = lazy(() => import("./pages/AnalyticsPage"));
+const OrganogramPage = lazy(() => import("./pages/OrganogramPage"));
+const OrganizationsPage = lazy(() => import("./pages/OrganizationsPage"));
+const MonitoringSuitePage = lazy(() => import("./pages/MonitoringSuitePage"));
+const AlertsPage = lazy(() => import("./pages/AlertsPage"));
 
 const LoadingFallback = () => (
   <div className="min-h-screen bg-dark-900 flex items-center justify-center">
@@ -39,6 +49,13 @@ function App() {
             <Route path="/sessions" element={<WorkSessionsPage />} />
             <Route path="/breaks" element={<BreakTrackerPage />} />
             <Route path="/leaves" element={<LeaveRequestsPage />} />
+            <Route path="/projects" element={<ProjectsPage />} />
+            <Route path="/tasks" element={<TasksPage />} />
+            <Route path="/kanban" element={<KanbanPage />} />
+            <Route path="/analytics" element={<AnalyticsPage />} />
+            <Route path="/organogram" element={<OrganogramPage />} />
+            <Route path="/monitoring" element={<MonitoringSuitePage />} />
+            <Route path="/alerts" element={<AlertsPage />} />
             <Route path="/reports" element={<ReportsPage />} />
           </Route>
 
@@ -51,6 +68,9 @@ function App() {
           <Route element={<ProtectedRoute allowedRoles={["Admin"]} />}>
             <Route path="/admin-policy" element={<AdminPolicyPage />} />
             <Route path="/audit" element={<AuditPage />} />
+            <Route path="/users" element={<UsersManagementPage />} />
+            <Route path="/holidays" element={<HolidayManagementPage />} />
+            <Route path="/organizations" element={<OrganizationsPage />} />
           </Route>
         </Route>
 

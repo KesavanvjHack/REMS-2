@@ -64,6 +64,40 @@ class AttendanceRecordViewSet(viewsets.ReadOnlyModelViewSet):
             "team_details": team_data
         })
 
+    @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def finalize_day(self, request):
+        """Allow an employee to finalize their own attendance for a given date."""
+        from .services import AttendanceEngine
+        date_str = request.data.get('date')
+        if not date_str:
+            return Response({"error": "Date is required"}, status=400)
+            
+        try:
+            date = timezone.datetime.strptime(date_str, '%Y-%m-%d').date()
+        except ValueError:
+            return Response({"error": "Invalid date format. Use YYYY-MM-DD"}, status=400)
+
+        record = AttendanceEngine.finalize_attendance_manual(request.user, date)
+        return Response(AttendanceRecordSerializer(record).data)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsManager])
+    def approve(self, request, pk=None):
+        """Allow a manager/admin to approve or reject a finalized attendance record."""
+        record = self.get_object()
+        if not record.is_finalized:
+            return Response({"error": "Record must be finalized before approval"}, status=400)
+            
+        status = request.data.get('status') # APPROVED or REJECTED
+        if status not in ['APPROVED', 'REJECTED']:
+            return Response({"error": "Invalid status. Use APPROVED or REJECTED"}, status=400)
+
+        record.approval_status = status
+        record.approved_by = request.user
+        record.remarks = request.data.get('remarks', record.remarks)
+        record.save()
+        
+        return Response(AttendanceRecordSerializer(record).data)
+
 class LeaveRequestViewSet(viewsets.ModelViewSet):
     serializer_class = LeaveRequestSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -78,11 +112,48 @@ class LeaveRequestViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
     @action(detail=True, methods=['post'], permission_classes=[IsManager])
-    def review(self, request, pk=None):
+    def approve_manager(self, request, pk=None):
         leave = self.get_object()
-        leave.status = request.data.get('status', 'PENDING')
-        leave.review_remarks = request.data.get('remarks', '')
-        leave.reviewed_by = request.user
+        status = request.data.get('status')
+        if status not in ['APPROVED', 'REJECTED']:
+            return Response({"error": "Invalid status"}, status=400)
+        
+        leave.manager_status = status
+        leave.manager_remarks = request.data.get('remarks', '')
+        leave.manager_reviewed_by = request.user
+        
+        # If manager rejects, final status is rejected
+        if status == 'REJECTED':
+            leave.status = 'REJECTED'
+            leave.reviewed_by = request.user
+            leave.review_remarks = "Rejected by Manager"
+        
+        leave.save()
+        return Response(LeaveRequestSerializer(leave).data)
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAdminUser])
+    def approve_hr(self, request, pk=None):
+        leave = self.get_object()
+        if leave.manager_status != 'APPROVED':
+            return Response({"error": "Manager must approve before HR"}, status=400)
+            
+        status = request.data.get('status')
+        if status not in ['APPROVED', 'REJECTED']:
+            return Response({"error": "Invalid status"}, status=400)
+            
+        leave.hr_status = status
+        leave.hr_remarks = request.data.get('remarks', '')
+        leave.hr_reviewed_by = request.user
+        
+        if status == 'REJECTED':
+            leave.status = 'REJECTED'
+            leave.reviewed_by = request.user
+            leave.review_remarks = "Rejected by HR/Admin"
+        elif status == 'APPROVED':
+            leave.status = 'APPROVED'
+            leave.reviewed_by = request.user
+            leave.review_remarks = "Fully Approved"
+            
         leave.save()
         return Response(LeaveRequestSerializer(leave).data)
 

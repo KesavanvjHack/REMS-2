@@ -14,13 +14,13 @@ class LeaveRequestAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'reason')
     actions = ['approve_leaves', 'reject_leaves']
 
+    @admin.action(description="Approve selected leave requests")
     def approve_leaves(self, request, queryset):
         queryset.update(status='APPROVED', reviewed_by=request.user)
-    approve_leaves.short_description = "Approve selected leave requests"
 
+    @admin.action(description="Reject selected leave requests")
     def reject_leaves(self, request, queryset):
         queryset.update(status='REJECTED', reviewed_by=request.user)
-    reject_leaves.short_description = "Reject selected leave requests"
 
 @admin.register(Holiday)
 class HolidayAdmin(admin.ModelAdmin):

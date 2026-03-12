@@ -1,25 +1,15 @@
 import { Outlet, Navigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
-import { useEffect } from "react";
-import axiosInstance from "../../api/axiosInstance";
+import useIdle from "../../hooks/useIdle";
+import useHeartbeat from "../../hooks/useHeartbeat";
 
 const MainLayout = () => {
   const token = localStorage.getItem("token");
-
-  useEffect(() => {
-    if (!token) return;
-
-    const heartbeat = setInterval(async () => {
-      try {
-        await axiosInstance.post("sessions/heartbeat/");
-      } catch (err) {
-        console.error("Heartbeat failed", err);
-      }
-    }, 60000); // Every minute
-
-    return () => clearInterval(heartbeat);
-  }, [token]);
+  
+  // Enterprise Hardening: Automatic Activity Tracking
+  const isIdle = useIdle(5); // 5 minutes threshold
+  useHeartbeat(isIdle, 1);   // 1 minute polling
 
   if (!token) {
     return <Navigate to="/login" replace />;

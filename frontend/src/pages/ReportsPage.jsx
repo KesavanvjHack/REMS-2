@@ -62,6 +62,10 @@ const ReportsPage = () => {
     a.click();
   };
 
+  const handlePrintPDF = () => {
+    window.print();
+  };
+
   if (loading) return <div className="py-20 text-center text-gray-400">Generating reports...</div>;
 
   return (
@@ -71,7 +75,8 @@ const ReportsPage = () => {
           <h1 className="text-2xl font-bold text-white">Reports & Analytics</h1>
           <p className="text-sm text-gray-400 mt-1">Attendance and productivity analytics</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 no-print">
+          <ExportButton label="Export PDF" onExport={handlePrintPDF} />
           <ExportButton label="Export CSV" onExport={handleExport} />
         </div>
       </div>

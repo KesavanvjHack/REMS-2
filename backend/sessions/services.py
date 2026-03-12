@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timedelta
 from django.utils import timezone
 from .models import WorkSession, BreakSession, IdleLog
@@ -64,11 +65,14 @@ class SessionService:
         return None
 
     @staticmethod
-    def log_heartbeat(user):
+    def log_heartbeat(user, ip=None, user_agent=None):
         """
         Receives heartbeat from frontend. 
+        Saves Heartbeat record for real-time monitoring.
         If user is idle for > threshold (e.g. 5 mins), mark as idle.
+        Implements Module 9: WFH Validation (Suspicious activity detection).
         """
+        from .models import Heartbeat
         now = timezone.now()
         threshold_minutes = 5
         
@@ -77,31 +81,51 @@ class SessionService:
         if not work_session:
             return "offline"
 
-        # Check if user is on break
+        # Module 9: WFH Validation - Check for IP or UA change
+        if ip and work_session.ip_address and ip != work_session.ip_address:
+            # Possible suspicious activity - log it
+            from audit.models import AuditLog
+            AuditLog.objects.create(
+                user=user,
+                action="SECURITY_ALERT",
+                description=f"IP mismatch detected during active session. Session IP: {work_session.ip_address}, Current IP: {ip}",
+                ip_address=ip,
+                module="WFH_VALIDATION"
+            )
+        
+        # Determine current status
+        status_val = "working"
         on_break = BreakSession.objects.filter(user=user, end_time__isnull=True).exists()
         if on_break:
-            return "on_break"
+            status_val = "on_break"
+        else:
+            # Logic for Idle Detection:
+            from django.core.cache import cache
+            cache_key = f"last_heartbeat_{user.id}"
+            last_heartbeat = cache.get(cache_key)
+            
+            cache.set(cache_key, now, 600) # Store for 10 mins
 
-        # Logic for Idle Detection:
-        # We look at the last recorded Activity/Heartbeat (stored in User model or a cache)
-        # For simplicity, we'll use a cache to store last heartbeat time
-        from django.core.cache import cache
-        cache_key = f"last_heartbeat_{user.id}"
-        last_heartbeat = cache.get(cache_key)
-        
-        cache.set(cache_key, now, 600) # Store for 10 mins
+            if last_heartbeat:
+                diff = (now - last_heartbeat).total_seconds()
+                if diff > (threshold_minutes * 60):
+                    # User was away, log idle period
+                    IdleLog.objects.create(
+                        user=user,
+                        work_session=work_session,
+                        start_time=last_heartbeat,
+                        end_time=now,
+                        reason="Inactivity detected"
+                    )
+                    status_val = "idle"
 
-        if last_heartbeat:
-            diff = (now - last_heartbeat).total_seconds()
-            if diff > (threshold_minutes * 60):
-                # User was away, log idle period
-                IdleLog.objects.create(
-                    user=user,
-                    work_session=work_session,
-                    start_time=last_heartbeat,
-                    end_time=now,
-                    reason="Inactivity detected"
-                )
-                return "idle"
+        # Save persistent heartbeat
+        Heartbeat.objects.create(
+            user=user,
+            work_session=work_session,
+            ip_address=ip,
+            user_agent=user_agent,
+            status=status_val
+        )
         
-        return "working"
+        return status_val

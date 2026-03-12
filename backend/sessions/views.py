@@ -77,5 +77,7 @@ class HeartbeatView(views.APIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def post(self, request):
-        status = SessionService.log_heartbeat(request.user)
+        ip = request.META.get('REMOTE_ADDR')
+        ua = request.META.get('HTTP_USER_AGENT')
+        status = SessionService.log_heartbeat(request.user, ip, ua)
         return response.Response({"status": status})

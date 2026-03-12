@@ -47,5 +47,20 @@ class IdleLog(BaseModel):
     end_time = models.DateTimeField(null=True, blank=True)
     reason = models.CharField(max_length=255, null=True, blank=True)
 
+
+class Heartbeat(BaseModel):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='heartbeats')
+    work_session = models.ForeignKey(WorkSession, on_delete=models.CASCADE, related_name='heartbeats', null=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(null=True, blank=True)
+    status = models.CharField(max_length=20, default='working') # working, idle, on_break
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['user', 'timestamp']),
+            models.Index(fields=['work_session', 'timestamp']),
+        ]
+
     def __str__(self):
-        return f"{self.user.username} Idle: {self.start_time}"
+        return f"{self.user.username} - {self.timestamp} - {self.status}"

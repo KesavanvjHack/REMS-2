@@ -6,10 +6,15 @@ from policies.models import AttendancePolicy
 
 class AttendanceEngine:
     @staticmethod
-    def calculate_daily_attendance(user, date):
+    def calculate_daily_attendance(user, date, finalize=False):
         policy = AttendancePolicy.objects.filter(is_active=True).first()
         if not policy:
             return None
+
+        # Check if already finalized
+        existing_record = AttendanceRecord.objects.filter(user=user, date=date).first()
+        if existing_record and existing_record.is_finalized:
+            return existing_record
 
         # Get sessions for this date
         sessions = WorkSession.objects.filter(
@@ -20,11 +25,15 @@ class AttendanceEngine:
         if not sessions.exists():
             # Check for holiday or leave (mock logic for now)
             # Record as ABSENT if no sessions
-            AttendanceRecord.objects.update_or_create(
+            record, _ = AttendanceRecord.objects.update_or_create(
                 user=user, date=date,
-                defaults={'status': 'ABSENT', 'total_work_hours': 0}
+                defaults={
+                    'status': 'ABSENT', 
+                    'total_work_hours': 0,
+                    'is_finalized': finalize
+                }
             )
-            return
+            return record
 
         total_work_sec = 0
         total_break_sec = 0
@@ -67,7 +76,7 @@ class AttendanceEngine:
         elif net_hours >= policy.min_half_day_hours:
             status = 'HALF_DAY'
 
-        AttendanceRecord.objects.update_or_create(
+        record, _ = AttendanceRecord.objects.update_or_create(
             user=user, date=date,
             defaults={
                 'status': status,
@@ -75,6 +84,13 @@ class AttendanceEngine:
                 'total_break_hours': round(break_hours, 2),
                 'total_idle_hours': round(idle_hours, 2),
                 'net_work_hours': round(net_hours, 2),
-                'is_late': is_late
+                'is_late': is_late,
+                'is_finalized': finalize
             }
         )
+        return record
+
+    @staticmethod
+    def finalize_attendance_manual(user, date):
+        """Manually finalize a record, usually called by the user at the end of the day."""
+        return AttendanceEngine.calculate_daily_attendance(user, date, finalize=True)

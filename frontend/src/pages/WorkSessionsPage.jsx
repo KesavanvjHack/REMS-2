@@ -85,6 +85,24 @@ const WorkSessionsPage = () => {
     }
   };
 
+  const handleFinalize = async () => {
+    if (isPunchedIn) {
+      alert("Please punch out before finalizing your attendance.");
+      return;
+    }
+    const today = new Date().toISOString().split('T')[0];
+    try {
+      setLoading(true);
+      await axiosInstance.post("attendance/records/finalize_day/", { date: today });
+      alert("Attendance finalized successfully!");
+      fetchHistory();
+    } catch (err) {
+      alert(err.response?.data?.error || "Finalization failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (statusLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -118,8 +136,24 @@ const WorkSessionsPage = () => {
       {/* Session History */}
       <div className="bg-dark-800 border border-dark-600 rounded-2xl overflow-hidden shadow-xl">
         <div className="p-5 border-b border-dark-600 flex justify-between items-center bg-dark-700/30">
-          <h3 className="text-lg font-bold text-white">Recent Attendance Records</h3>
-          <button onClick={fetchHistory} className="text-xs font-medium text-accent hover:underline">Refresh</button>
+          <div>
+            <h3 className="text-lg font-bold text-white">Recent Attendance Records</h3>
+            <p className="text-xs text-gray-500">Finalize your day after punching out</p>
+          </div>
+          <div className="flex gap-3">
+             <button 
+                onClick={handleFinalize}
+                disabled={loading || isPunchedIn}
+                className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
+                  isPunchedIn 
+                    ? 'bg-gray-700 text-gray-500 cursor-not-allowed' 
+                    : 'bg-accent/10 text-accent hover:bg-accent hover:text-white border border-accent/20'
+                }`}
+              >
+                Finalize Today
+              </button>
+             <button onClick={fetchHistory} className="text-xs font-medium text-gray-400 hover:text-white uppercase tracking-tighter">Refresh</button>
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
@@ -128,7 +162,8 @@ const WorkSessionsPage = () => {
                 <th className="px-6 py-4">Date</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4">Work Hours</th>
-                <th className="px-6 py-4">Late</th>
+                <th className="px-6 py-4">Verification</th>
+                <th className="px-6 py-4">Approval</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-dark-600">
@@ -144,14 +179,29 @@ const WorkSessionsPage = () => {
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-300 font-mono">{s.total_work_hours || '0.00'} hrs</td>
                   <td className="px-6 py-4">
-                    <span className={`text-sm ${s.is_late ? 'text-orange-400' : 'text-gray-500'}`}>
-                      {s.is_late ? 'Yes' : 'No'}
+                    <span className={`px-2 py-1 rounded-md text-[10px] font-bold ${
+                      s.is_finalized ? 'bg-blue-500/10 text-blue-400' : 'bg-gray-500/10 text-gray-500'
+                    }`}>
+                      {s.is_finalized ? 'FINALIZED' : 'DRAFT'}
                     </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    {s.is_finalized ? (
+                      <span className={`px-2 py-1 rounded-md text-[10px] font-bold ${
+                        s.approval_status === 'APPROVED' ? 'bg-green-500/10 text-green-500' : 
+                        s.approval_status === 'REJECTED' ? 'bg-red-500/10 text-red-500' : 
+                        'bg-orange-500/10 text-orange-400'
+                      }`}>
+                        {s.approval_status}
+                      </span>
+                    ) : (
+                      <span className="text-gray-600 text-[10px] italic">Waiting for finalization</span>
+                    )}
                   </td>
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan="4" className="px-6 py-10 text-center text-gray-500 italic">No attendance records found</td>
+                  <td colSpan="5" className="px-6 py-10 text-center text-gray-500 italic">No attendance records found</td>
                 </tr>
               )}
             </tbody>

@@ -41,6 +41,10 @@ INSTALLED_APPS = [
     'attendance',
     'reports',
     'audit',
+    'tasks',
+    'organizations',
+    'monitoring',
+    'notifications',
 ]
 
 AUTH_USER_MODEL = "accounts.User"
@@ -62,6 +66,7 @@ MIDDLEWARE = [
     # Enterprise Hardening Middleware
     'core.middleware.error_handler.RequestLoggingMiddleware',
     'core.middleware.error_handler.EnterpriseErrorMiddleware',
+    'audit.middleware.AuditMiddleware',
 ]
 
 # =========================

@@ -12,6 +12,12 @@ class AttendanceRecord(BaseModel):
         ('INACTIVE', 'Inactive'),
     )
 
+    APPROVAL_CHOICES = (
+        ('PENDING', 'Pending'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
+    )
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='attendance_records')
     date = models.DateField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ABSENT')
@@ -22,6 +28,9 @@ class AttendanceRecord(BaseModel):
     net_work_hours = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     
     is_late = models.BooleanField(default=False)
+    is_finalized = models.BooleanField(default=False)
+    approval_status = models.CharField(max_length=20, choices=APPROVAL_CHOICES, default='PENDING')
+    approved_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_attendance')
     remarks = models.TextField(null=True, blank=True)
 
     class Meta:
@@ -51,6 +60,18 @@ class LeaveRequest(BaseModel):
     start_date = models.DateField()
     end_date = models.DateField()
     reason = models.TextField()
+    
+    # Tier 1: Manager Approval
+    manager_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    manager_reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='manager_reviewed_leaves')
+    manager_remarks = models.TextField(null=True, blank=True)
+    
+    # Tier 2: HR/Admin Approval
+    hr_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    hr_reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='hr_reviewed_leaves')
+    hr_remarks = models.TextField(null=True, blank=True)
+    
+    # Final Result (Consolidated)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
     reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='reviewed_leaves')
     review_remarks = models.TextField(null=True, blank=True)

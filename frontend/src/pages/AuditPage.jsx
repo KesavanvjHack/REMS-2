@@ -24,14 +24,18 @@ const AuditPage = () => {
   const columns = [
     { key: "created_at", label: "Timestamp", render: (v) => new Date(v).toLocaleString() },
     { key: "username", label: "User" },
+    { key: "module", label: "Module" },
     { 
       key: "action", 
       label: "Action", 
-      render: (v) => (
-        <Badge variant={v === "LOGIN" ? "success" : v === "PUNCH_IN" ? "info" : "default"}>
-          {v}
-        </Badge>
-      ) 
+      render: (v) => {
+        const isMutation = v.includes('POST') || v.includes('PUT') || v.includes('PATCH') || v.includes('DELETE');
+        return (
+          <Badge variant={isMutation ? "warning" : "info"}>
+            {v}
+          </Badge>
+        );
+      } 
     },
     { key: "ip_address", label: "IP Address" },
     { key: "description", label: "Details" },

@@ -1,6 +1,7 @@
 import logging
 import traceback
 from django.http import JsonResponse
+from django.utils import timezone
 from django.core.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 from rest_framework import status
@@ -19,29 +20,35 @@ class EnterpriseErrorMiddleware:
             return self.handle_exception(request, e)
 
     def handle_exception(self, request, e):
-        # Determine status code
+        # Determine status code and message
         if isinstance(e, PermissionDenied):
             status_code = 403
-            message = "You do not have permission to perform this action."
+            message = "Authentication credentials were not provided or are invalid."
         elif isinstance(e, ValidationError):
             status_code = 400
-            message = str(e)
+            message = "Validation Error: " + str(e)
         else:
-            status_code = 500
-            message = "An internal server error occurred."
-            # Log the full traceback for 500 errors
-            logger.error(f"Internal Server Error: {str(e)}\n{traceback.format_exc()}")
+            status_code = getattr(e, 'status_code', 500)
+            message = getattr(e, 'detail', "An unexpected system error occurred.")
+            
+            if status_code == 500:
+                message = "Internal Server Interruption. Our engineers have been notified."
+                logger.error(f"CRITICAL ERROR: {str(e)}\n{traceback.format_exc()}")
 
-        # Ensure we return a consistent JSON response
+        # Consistent Enterprise Response Structure
         response_data = {
             "success": False,
-            "error": message,
-            "code": status_code,
-            "path": request.path
+            "error": {
+                "message": str(message),
+                "type": e.__class__.__name__,
+                "code": status_code
+            },
+            "meta": {
+                "path": request.path,
+                "timestamp": str(timezone.now() if 'timezone' in globals() else "")
+            }
         }
 
-        # Return JsonResponse if it's a standard Django request, 
-        # or we can just always use JsonResponse for the middleware layer
         return JsonResponse(response_data, status=status_code)
 
 class RequestLoggingMiddleware:

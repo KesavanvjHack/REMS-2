@@ -46,17 +46,24 @@ const LeaveRequestsPage = () => {
     }
   };
 
-  const handleReview = async (id, status) => {
-    const remarks = prompt("Enter review remarks:");
+  const handleReview = async (id, level, status) => {
+    const remarks = prompt(`Enter ${level} review remarks:`);
     if (remarks === null) return;
     
     try {
-      await axiosInstance.post(`attendance/leaves/${id}/review/`, { status, remarks });
+      const endpoint = level === 'Manager' ? 'approve_manager' : 'approve_hr';
+      await axiosInstance.post(`attendance/leaves/${id}/${endpoint}/`, { status, remarks });
       fetchLeaves();
     } catch (err) {
-      alert("Failed to review leave request");
+      alert(err.response?.data?.error || "Failed to review leave request");
     }
   };
+
+  const StatusBadge = ({ v }) => (
+    <Badge variant={v === 'APPROVED' ? 'success' : v === 'REJECTED' ? 'danger' : 'warning'}>
+        {v}
+    </Badge>
+  );
 
   const columns = [
     { key: "created_at", label: "Date Applied", render: (v) => new Date(v).toLocaleDateString() },
@@ -65,8 +72,18 @@ const LeaveRequestsPage = () => {
     { key: "start_date", label: "Starts" },
     { key: "end_date", label: "Ends" },
     { 
+      key: "manager_status", 
+      label: "Manager", 
+      render: (v) => <StatusBadge v={v} />
+    },
+    { 
+        key: "hr_status", 
+        label: "HR/Admin", 
+        render: (v) => <StatusBadge v={v} />
+    },
+    { 
       key: "status", 
-      label: "Status", 
+      label: "Final", 
       render: (v) => (
         <Badge variant={v === 'APPROVED' ? 'success' : v === 'REJECTED' ? 'danger' : 'warning'}>
           {v}
@@ -76,14 +93,26 @@ const LeaveRequestsPage = () => {
     {
       key: "actions",
       label: "Actions",
-      render: (_, row) => (
-        role !== 'Employee' && row.status === 'PENDING' ? (
-          <div className="flex gap-2">
-            <button onClick={() => handleReview(row.id, 'APPROVED')} className="text-xs text-green-400 hover:underline">Approve</button>
-            <button onClick={() => handleReview(row.id, 'REJECTED')} className="text-xs text-red-400 hover:underline">Reject</button>
-          </div>
-        ) : <span className="text-xs text-gray-500">{row.review_remarks || "--"}</span>
-      )
+      render: (_, row) => {
+        const isOwner = row.username === localStorage.getItem("username");
+        if (role === 'Manager' && row.manager_status === 'PENDING' && !isOwner) {
+            return (
+                <div className="flex gap-2">
+                    <button onClick={() => handleReview(row.id, 'Manager', 'APPROVED')} className="text-xs text-green-400 hover:underline">Approve</button>
+                    <button onClick={() => handleReview(row.id, 'Manager', 'REJECTED')} className="text-xs text-red-400 hover:underline">Reject</button>
+                </div>
+            );
+        }
+        if (role === 'Admin' && row.hr_status === 'PENDING' && row.manager_status === 'APPROVED') {
+            return (
+                <div className="flex gap-2">
+                   <button onClick={() => handleReview(row.id, 'HR', 'APPROVED')} className="text-xs text-green-400 hover:underline">Approve</button>
+                   <button onClick={() => handleReview(row.id, 'HR', 'REJECTED')} className="text-xs text-red-400 hover:underline">Reject</button>
+                </div>
+            )
+        }
+        return <span className="text-xs text-gray-500 italic">No actions</span>
+      }
     }
   ];
 

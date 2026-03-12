@@ -21,39 +21,47 @@ class ReportSummaryView(views.APIView):
         # Simple summary for the dashboard
         qs = AttendanceRecord.objects.all() if user.role in ['Admin', 'Manager'] else AttendanceRecord.objects.filter(user=user)
         
-        # Weekly Trend (last 5 days)
-        today = timezone.now().date()
+        # Chart Data (last 7 days)
+        today_dt = timezone.now()
         days_of_week = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-        trend = []
-        for i in range(4, -1, -1):
-            date = today - timedelta(days=i)
+        chart_data = []
+        for i in range(6, -1, -1):
+            date = (today_dt - timedelta(days=i)).date()
             day_qs = qs.filter(date=date)
-            # Use aggregation to avoid multiple queries
-            aggs = day_qs.aggregate(
-                avg_work=Avg('total_work_hours'),
-                avg_productive=Avg('net_work_hours')
-            )
-            trend.append({
+            from tasks.models import Task
+            task_count = Task.objects.filter(assignee=user, created_at__date=date).count() if user.role == 'Employee' else Task.objects.filter(created_at__date=date).count()
+            
+            chart_data.append({
                 "day": days_of_week[date.weekday()],
-                "hours": aggs['avg_work'] or 0,
-                "productive": aggs['avg_productive'] or 0
+                "hours": float(day_qs.aggregate(avg=Avg('total_work_hours'))['avg'] or 0),
+                "tasks": task_count
             })
 
+        # Dashboard Summary
+        from tasks.models import Task
+        from attendance.models import LeaveRequest
+        from sessions.models import WorkSession, IdleLog
+        from accounts.models import User
+
+        active_session = WorkSession.objects.filter(user=user, end_time__isnull=True).exists()
+        
         # Activity Breakdown (today)
+        today = today_dt.date()
         today_qs = qs.filter(date=today)
         total = today_qs.count() or 1
-        active = today_qs.filter(status='PRESENT').count()
+        present = today_qs.filter(status='PRESENT').count()
         absent = today_qs.filter(status='ABSENT').count()
         late = today_qs.filter(is_late=True).count()
 
         summary = {
-            "total_present": qs.filter(status='PRESENT').count(),
-            "total_absent": qs.filter(status='ABSENT').count(),
-            "avg_working_hours": qs.aggregate(avg=Avg('net_work_hours'))['avg'] or 0,
-            "total_late": qs.filter(is_late=True).count(),
-            "weekly_trend": trend,
+            "status": "Working" if active_session else "Offline",
+            "total_leaves": LeaveRequest.objects.filter(user=user, status='APPROVED').count(),
+            "pending_tasks": Task.objects.filter(assignee=user).exclude(status='DONE').count() if user.role == 'Employee' else Task.objects.exclude(status='DONE').count(),
+            "total_users": User.objects.filter(is_active=True).count(),
+            "idle_alerts": IdleLog.objects.filter(work_session__start_time__date=today).count(),
+            "chart_data": chart_data,
             "activity_breakdown": {
-                "active": (active / total) * 100,
+                "active": (present / total) * 100,
                 "idle": (late / total) * 100,
                 "break": (absent / total) * 100
             }

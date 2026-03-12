@@ -11,6 +11,8 @@ class AttendanceRecordSerializer(serializers.ModelSerializer):
 
 class LeaveRequestSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
+    manager_reviewed_by_name = serializers.CharField(source='manager_reviewed_by.username', read_only=True)
+    hr_reviewed_by_name = serializers.CharField(source='hr_reviewed_by.username', read_only=True)
     reviewed_by_name = serializers.CharField(source='reviewed_by.username', read_only=True)
 
     class Meta:

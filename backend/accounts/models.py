@@ -17,6 +17,7 @@ class User(AbstractUser):
     designation = models.CharField(max_length=100)
     department = models.CharField(max_length=100)
     role = models.CharField(max_length=50, choices=ROLE_CHOICES, default=EMPLOYEE)
+    work_location = models.CharField(max_length=20, choices=[('Remote', 'Remote'), ('Hybrid', 'Hybrid'), ('On-site', 'On-site')], default='Remote')
     gender = models.CharField(max_length=10)
     address = models.TextField()
     mobile = models.CharField(max_length=10, unique=True)
