@@ -18,7 +18,7 @@ class CompanySerializer(serializers.ModelSerializer):
     departments = DepartmentSerializer(many=True, read_only=True)
     class Meta:
         model = Company
-        fields = ['id', 'name', 'registration_id', 'address', 'contact_email', 'website', 'departments']
+        fields = ['id', 'name', 'registration_id', 'address', 'contact_email', 'website', 'logo', 'theme_color', 'departments']
 
 class OrgTreeSerializer(serializers.ModelSerializer):
     """Simplified tree structure for the Organogram visualization"""

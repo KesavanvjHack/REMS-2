@@ -172,6 +172,19 @@ const AnalyticsPage = () => {
               </div>
           </div>
       </div>
+
+      {stats?.remarks && (
+          <div className="bg-accent/10 border border-accent/20 rounded-3xl p-6 shadow-xl">
+              <div className="flex items-center gap-3 mb-4">
+                  <span className="text-xl">💬</span>
+                  <h3 className="text-lg font-bold text-white uppercase tracking-tight">Managerial Feedback</h3>
+                  {stats.correction_requested && <Badge variant="warning">Refining</Badge>}
+              </div>
+              <div className="bg-dark-900/50 p-4 rounded-xl border border-dark-600">
+                  <p className="text-sm text-gray-300 font-medium leading-relaxed italic">"{stats.remarks}"</p>
+              </div>
+          </div>
+      )}
     </div>
   );
 };

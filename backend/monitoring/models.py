@@ -35,6 +35,8 @@ class ProductivitySnapshot(BaseModel):
     score = models.DecimalField(max_digits=5, decimal_places=2)
     date = models.DateField(auto_now_add=True)
     breakdown = models.JSONField(default=dict) # {"attendance": 80, "tasks": 90, "usage": 70}
+    remarks = models.TextField(blank=True)
+    correction_requested = models.BooleanField(default=False)
 
     class Meta:
         get_latest_by = 'date'

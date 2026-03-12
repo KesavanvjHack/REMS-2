@@ -44,9 +44,11 @@ class AttendanceRecordViewSet(viewsets.ReadOnlyModelViewSet):
         
         team_data = []
         user_ids = records.values_list('user_id', flat=True).distinct()
+        from monitoring.models import ProductivitySnapshot
         for uid in user_ids:
             u_records = records.filter(user_id=uid)
             user = u_records[0].user
+            latest_snap = ProductivitySnapshot.objects.filter(user=user).order_by('-date').first()
             team_data.append({
                 "id": user.id,
                 "name": user.username,
@@ -55,6 +57,13 @@ class AttendanceRecordViewSet(viewsets.ReadOnlyModelViewSet):
                 "absent": u_records.filter(status='ABSENT').count(),
                 "late": u_records.filter(is_late=True).count(),
                 "avgHours": u_records.aggregate(Avg('total_work_hours'))['total_work_hours__avg'] or 0,
+                "score": float(latest_snap.score) if latest_snap else 0,
+                "correction_requested": latest_snap.correction_requested if latest_snap else False,
+                "latest_snapshot": {
+                    "id": latest_snap.id,
+                    "remarks": latest_snap.remarks,
+                    "user_name": user.username
+                } if latest_snap else None
             })
 
         return Response({

@@ -172,3 +172,40 @@ def admin_dashboard(request):
         "message": "Welcome Admin Dashboard",
         "admin": request.user.username
     }, status=status.HTTP_200_OK)
+
+
+# ========================
+# BULK USER IMPORT
+# ========================
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def bulk_user_import(request):
+    if request.user.role != "Admin":
+        return Response({"error": "Unauthorized"}, status=403)
+
+    csv_file = request.FILES.get('file')
+    if not csv_file:
+        return Response({"error": "No file uploaded"}, status=400)
+
+    if not csv_file.name.endswith('.csv'):
+        return Response({"error": "File must be a CSV"}, status=400)
+
+    from .services import UserImportService
+    results = UserImportService.import_users_from_csv(csv_file)
+    
+    return Response(results, status=200)
+
+
+# ========================
+# LIST USERS (FOR ADMIN)
+# ========================
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def list_users(request):
+    if request.user.role != "Admin":
+        return Response({"error": "Unauthorized"}, status=403)
+    
+    from .serializers import UserSerializer
+    users = User.objects.all()
+    serializer = UserSerializer(users, many=True)
+    return Response(serializer.data)

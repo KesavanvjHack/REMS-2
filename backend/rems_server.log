@@ -2489,3 +2489,17 @@ INFO 2026-03-12 15:00:26,379 error_handler 6616 13756 Request: GET /api/attendan
 INFO 2026-03-12 15:00:26,484 error_handler 6616 13756 Response: GET /api/attendance/records/team_summary/ - Status: 200
 INFO 2026-03-12 15:00:26,511 error_handler 6616 13756 Request: GET /api/attendance/records/team_summary/ - User: AnonymousUser
 INFO 2026-03-12 15:00:26,614 error_handler 6616 13756 Response: GET /api/attendance/records/team_summary/ - Status: 200
+INFO 2026-03-12 15:06:39,170 autoreload 6616 12796 D:\REMS-main\backend\accounts\urls.py changed, reloading.
+INFO 2026-03-12 15:06:48,876 autoreload 5912 3928 Watching for file changes with StatReloader
+INFO 2026-03-12 15:07:12,796 autoreload 5912 3928 D:\REMS-main\backend\accounts\views.py changed, reloading.
+INFO 2026-03-12 15:07:19,362 autoreload 8428 8468 Watching for file changes with StatReloader
+INFO 2026-03-12 15:07:43,959 autoreload 8428 8468 D:\REMS-main\backend\monitoring\models.py changed, reloading.
+INFO 2026-03-12 15:07:52,058 autoreload 12912 7100 Watching for file changes with StatReloader
+INFO 2026-03-12 15:07:56,872 autoreload 12912 7100 D:\REMS-main\backend\monitoring\serializers.py changed, reloading.
+INFO 2026-03-12 15:07:59,588 autoreload 11724 796 Watching for file changes with StatReloader
+INFO 2026-03-12 15:09:26,443 autoreload 11724 796 D:\REMS-main\backend\monitoring\urls.py changed, reloading.
+INFO 2026-03-12 15:09:36,852 autoreload 9920 5916 Watching for file changes with StatReloader
+INFO 2026-03-12 15:09:52,156 autoreload 9920 5916 D:\REMS-main\backend\organizations\models.py changed, reloading.
+INFO 2026-03-12 15:10:03,013 autoreload 8792 13432 Watching for file changes with StatReloader
+INFO 2026-03-12 15:42:21,910 autoreload 8792 13432 D:\REMS-main\backend\monitoring\views.py changed, reloading.
+INFO 2026-03-12 15:42:26,873 autoreload 12108 2768 Watching for file changes with StatReloader

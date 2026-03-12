@@ -29,7 +29,7 @@ const LoginPage = () => {
       setShowOtpToast(true);
       setStep(2);
     } catch (err) {
-      setError(err.response?.data?.error || err.response?.data?.message || "Login failed. Please try again.");
+      setError(err.message || "Login failed. Please try again.");
     } finally {
       setLoading(false);
     }

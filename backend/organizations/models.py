@@ -15,6 +15,8 @@ class Department(BaseModel):
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='departments')
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
+    logo = models.ImageField(upload_to="logos/", null=True, blank=True)
+    theme_color = models.CharField(max_length=20, default="#3b82f6")
 
     def __str__(self):
         return f"{self.name} ({self.company.name})"

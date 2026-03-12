@@ -1,10 +1,11 @@
 from rest_framework.routers import DefaultRouter
-from .views import MonitoringPlanViewSet, ScreenshotLogViewSet, UsageViewSet, ProductivityViewSet
+from .views import MonitoringPlanViewSet, ScreenshotLogViewSet, UsageViewSet, ProductivityViewSet, ProductivitySnapshotViewSet
 from django.urls import path
 
 router = DefaultRouter()
-router.register('plans', MonitoringPlanViewSet, basename='plan')
-router.register('screenshots', ScreenshotLogViewSet, basename='screenshot')
+router.register(r'usage', UsageViewSet, basename='usage')
+router.register(r'productivity', ProductivityViewSet, basename='productivity')
+router.register(r'snapshots', ProductivitySnapshotViewSet, basename='snapshots')
 
 urlpatterns = [
     path('usage/', UsageViewSet.as_view({'get': 'list'})),

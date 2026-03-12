@@ -58,3 +58,22 @@ class ProductivityViewSet(viewsets.ViewSet):
         user = request.user
         snapshots = ProductivitySnapshot.objects.filter(user=user).order_by('date')[:30]
         return response.Response(ProductivitySnapshotSerializer(snapshots, many=True).data)
+
+class ProductivitySnapshotViewSet(viewsets.ModelViewSet):
+    queryset = ProductivitySnapshot.objects.all()
+    serializer_class = ProductivitySnapshotSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == 'Admin':
+            return ProductivitySnapshot.objects.all()
+        elif user.role == 'Manager':
+            # Managers can see snapshots of everyone or filter by team in future
+            return ProductivitySnapshot.objects.all()
+        return ProductivitySnapshot.objects.filter(user=user)
+
+    def partial_update(self, request, *args, **kwargs):
+        if request.user.role not in ['Admin', 'Manager']:
+            return response.Response({"error": "Unauthorized. Only managers can update feedback."}, status=403)
+        return super().partial_update(request, *args, **kwargs)

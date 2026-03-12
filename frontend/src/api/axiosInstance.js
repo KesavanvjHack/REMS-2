@@ -62,10 +62,13 @@ axiosInstance.interceptors.response.use(
         }
 
         const { status } = response;
-        const errorData = response.data || {};
-
         // Extract consistent error message
-        const message = errorData.error || errorData.detail || errorData.message || "An unexpected error occurred.";
+        const errorData = response.data || {};
+        let message = errorData.detail || errorData.message || "An unexpected error occurred.";
+        
+        if (errorData.error) {
+            message = typeof errorData.error === 'object' ? (errorData.error.message || message) : errorData.error;
+        }
 
         // Unauthorized → logout user (but ignore for login endpoint)
         if (status === 401 && !config.url.includes("auth/login")) {

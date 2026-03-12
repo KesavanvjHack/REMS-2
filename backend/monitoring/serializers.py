@@ -25,4 +25,4 @@ class WebsiteUsageSerializer(serializers.ModelSerializer):
 class ProductivitySnapshotSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductivitySnapshot
-        fields = ['date', 'score', 'breakdown']
+        fields = ['id', 'user', 'score', 'date', 'breakdown', 'remarks', 'correction_requested']
